@@ -34,7 +34,6 @@ public class App implements CommandLineRunner {
 	@Autowired
 	CustomerRepository customerRepository;
 	
-	
 	@Override
 	public void run(String...strings) throws Exception{
 		
