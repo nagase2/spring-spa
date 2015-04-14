@@ -11,12 +11,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="customers")//テーブル名（＝クラス名）
+@Table(name="supplier")//テーブル名（＝クラス名）
 
 @Data
 @NoArgsConstructor //JPAの仕様で、EntityClassには引数のないデフォルトコンストラクタを作る必要がある。
 @AllArgsConstructor
-public class Customer {
+public class Supplier {
 	@Id
 	@GeneratedValue //主キーがDBで自動裁判されることをこのアノテーションで示す
 	private Integer id;
@@ -24,6 +24,5 @@ public class Customer {
 	private String firstName;
 	@Column(nullable =false)
 	private String lastName;
-//	private String address;
-//	private String tell;
+	private String tel;
 }

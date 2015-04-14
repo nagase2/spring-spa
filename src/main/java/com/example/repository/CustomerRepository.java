@@ -8,6 +8,10 @@ import java.util.concurrent.ConcurrentMap;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -22,55 +26,11 @@ import com.example.domain.Customer;
 
 @Repository
 @Transactional
-public class CustomerRepository {
-	//@Autowired
-	//private final ConcurrentMap<Integer,Customer> customerMap=new ConcurrentHashMap<>();
-	@Autowired
-	NamedParameterJdbcTemplate jdbcTemplate;
-	SimpleJdbcInsert insert;
-	@PostConstruct
-	public void init(){
-		insert=new SimpleJdbcInsert((JdbcTemplate) jdbcTemplate.getJdbcOperations())
-		.withTableName("customers") //SimpleJdbcinsertは、InsertのSQLを自動生成するので、テーブル名のみ指定する
-		.usingGeneratedKeyColumns("id");
-	}
+public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 	
-	//
-	private static final RowMapper<Customer> customerRowMapper = (rs,i) -> {
-		Integer id = rs.getInt("id");
-		String firstName =rs.getString("first_name");
-		String lastName = rs.getString("last_name");
-		return new Customer(id, firstName,lastName);
-	};
-	
-	
-	public List<Customer> findAll(){
-		List<Customer> customers = jdbcTemplate.query("SELECT id,first_name, last_name FROM customers order by id", customerRowMapper);
-		return customers;
-	}
-	
-	public Customer findOne(Integer id){
-		SqlParameterSource param =new MapSqlParameterSource().addValue("id", id);
-		return jdbcTemplate.queryForObject("SELECT id, first_name, last_name from cusotmers where id=:id", param, customerRowMapper);
-	}
-	
-	public Customer save(Customer customer){
-		SqlParameterSource param = new BeanPropertySqlParameterSource(customer); //値の名前と同じ名前でパラメータを自動セット
-		if(customer.getId()==null){
-			//jdbcTemplate.update("INSERT INTO customers(first_name,last_name) values(:firstName, :lastName)",param);
-			Number key = insert.executeAndReturnKey(param);
-			customer.setId(key.intValue());
-		
-		}else{
-			jdbcTemplate.update("UPDATE customers SET first_name:firstName, last_name=:lastName where id =:id", param);
-		}
-		return customer;
-	}
-//	
-//	public void delete(Integer customerId){
-//		customerMap.remove(customerId);
-//	}
-//	
+	@Query("SELECT a FROM Customer a ORDER BY a.firstName, a.lastName") //JPQLで指定
+	//@Query(value="select id,first_name,last_name,address from customers order by first_name desc",nativeQuery=true)
+	Page<Customer> findAllOrderByName2(Pageable pageable);
 }
 
 
